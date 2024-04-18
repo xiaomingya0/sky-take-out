@@ -13,9 +13,6 @@ spring:
       username: ${sky.datasource.username}
       password: ${sky.datasource.password}
   servlet:
-#文件上传配置
-multipart:
-      location: G:\sky-take-out\img
 
 mybatis:
   #mapper配置文件
@@ -42,17 +39,21 @@ sky:
     # 设置前端传递过来的令牌名称
     admin-token-name: token
 
-baseUploadUrl: file:///G:/sky-take-out/img
+
+#七牛云配置
+
+oss:
+  qiniu:
+    host: https://sbvvu4mwi.sabkt.gdipper.com
+    accessKey: hbPgeku4OIMcQr0rlTvnm7aBhVH6-lDaS8NxzWll
+    secretKey: T4kVgWcDJJv4HdCD1E0WY-361pRGNJ8J9fbzcx3s
+    bucketName: xiaoming-sky-ceshi
+
+#upload:
+#  server:
+#    directory: /img
 
 
-#qiniu:
-#  accessKey: _dSs3P3qGfNpWC8yR8vO3_8GObiKdNSsPizJjpq3
-#  secretKey: 7tJO5hnS2N0cHzSIwlxMJ_a2gKEVprMz6o0fGrf8
-#  bucket: xiaoming-sky
-#  path: sbvvu4mwi.sabkt.gdipper.com
-#
-#baseUploadUrl:
 
-file:
-  upload:
-    dir: G:\sky-take-out\img
+
+

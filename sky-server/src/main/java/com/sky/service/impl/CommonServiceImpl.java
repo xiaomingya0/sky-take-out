@@ -1,66 +1,132 @@
-//package com.sky.service.impl;
-//
-//import com.qiniu.storage.UploadManager;
-//import com.qiniu.util.Auth;
-//import com.qiniu.util.StringMap;
-//import com.sky.service.CommonService;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.stereotype.Service;
-//import org.springframework.web.multipart.MultipartFile;
-//
-//import java.io.File;
-//import java.io.IOException;
-//import java.util.Map;
-//
-//
-///**
-// * 功能
-// * 作者： 小茗
-// * 日期：2024/4/12 0:38
-// */
-//@Service
-//public class CommonServiceImpl implements CommonService {
-//    @Autowired
-//    private UploadManager uploadManager;
-//
-//    @Autowired
-//    private Auth auth;
-//
-//    @Value("${qiniu.bucket}")
-//    private String bucket;
-//
-//    private StringMap putPolicy;
-//
-//    @Override
-//    public Map<String, Object> uploadFile(MultipartFile file) throws IOException {
-//        // 在这里编写将 MultipartFile 转换为 File 的逻辑
-//        // 例如，可以将 MultipartFile 写入临时文件，然后获取文件对象进行上传
-//        File convertedFile = convertMultipartFileToFile(file);
-//
-//        // 调用真正的上传方法，这里假设已经实现了上传逻辑
-//        Map<String, Object> response = uploadToQiniu(convertedFile);
-//
-//        // 返回上传结果
-//        return response;
-//    }
-//
-//    // 这是一个示例的 MultipartFile 转换为 File 的方法，您需要根据实际需求进行实现
-//    private File convertMultipartFileToFile(MultipartFile multipartFile) throws IOException {
-//        File file = new File(multipartFile.getOriginalFilename());
-//        multipartFile.transferTo(file);
-//        return file;
-//    }
-//
-//    // 这是一个示例的上传到七牛云的方法，您需要根据实际情况进行实现
-//    private Map<String, Object> uploadToQiniu(File file) {
-//        // 在这里编写上传到七牛云的逻辑
-//        // 返回上传结果
-//        return null;
-//    }
-//
-//    private String getUploadToken(){
-//        return this.auth.uploadToken(bucket,null,3600,putPolicy);
-//    }
-//
-//}
+package com.sky.service.impl;
+
+import com.google.gson.Gson;
+import com.qiniu.common.QiniuException;
+import com.qiniu.common.Zone;
+import com.qiniu.http.Response;
+import com.qiniu.storage.BucketManager;
+import com.qiniu.storage.Configuration;
+import com.qiniu.storage.UploadManager;
+import com.qiniu.storage.model.DefaultPutRet;
+import com.qiniu.util.Auth;
+import com.sky.config.QiNiuYunConfig;
+import com.sky.service.CommonService;
+import com.sky.utils.StringUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+/**
+ * 功能
+ * 作者： 小茗
+ * 日期：2024/4/16 21:29
+ */
+@Service
+
+public class CommonServiceImpl implements CommonService {
+
+    private QiNiuYunConfig qiNiuYunCofig;
+
+    /** 七牛文件上传管理器 */
+    private UploadManager uploadManager;
+
+    /** 上传的token */
+    private String token;
+
+    /** 七牛认证管理 */
+    private Auth auth;
+
+    private BucketManager bucketManager;
+
+
+
+    public CommonServiceImpl(QiNiuYunConfig qiNiuYunConfig){
+        this.qiNiuYunCofig = qiNiuYunConfig;
+        init();
+    }
+
+    private void init() {
+        //东南地区as0
+        uploadManager = new UploadManager(new Configuration(Zone.zoneAs0()));
+        auth = Auth.create(qiNiuYunCofig.getAccessKey(), qiNiuYunCofig.getSecretKey());
+
+        //根据命名空间生成的token
+        bucketManager = new BucketManager(auth, new Configuration(Zone.zoneAs0()));
+        token = auth.uploadToken(qiNiuYunCofig.getBucketName());
+    }
+
+
+    /**
+     * 上传文件
+     * @param file
+     * @return
+     */
+    @Override
+    public String uploadQNImg(MultipartFile file) {
+        String resultImage = "失败";
+        try {
+            //判断图片后缀，并使用工具类根据上传文件生成唯一图片名称，防止截断字符如“%00”
+            String fileName = file.getOriginalFilename();
+            String imgName = StringUtil.getRandomImgName(fileName);
+
+            //判断是否为恶意程序
+            //通过流的方式把文件转换为BufferedImage对象。获取宽和高。只有图片才具有宽高属性
+            BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
+            if (bufferedImage == null || bufferedImage.getHeight() == 0 || bufferedImage.getWidth() == 0){
+                return resultImage;
+            }
+
+            //上传图片文件
+            Response res = uploadManager.put(file.getInputStream(), imgName, token , null, null);
+            if(!res.isOK()){
+                throw new RuntimeException("上传七牛云出错:" + res.toString());
+            }
+
+            //解析上传文件成功结果
+            DefaultPutRet putRet = new Gson().fromJson(res.bodyString(), DefaultPutRet.class);
+
+            //直接返回外链地址
+            return getPrivateFile(imgName);
+        } catch (QiniuException e) {
+            e.printStackTrace();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return "失败";
+    }
+
+    /**
+     * 获取私有空间文件
+     * @param fileKey
+     * @return
+     */
+
+    private String getPrivateFile(String fileKey) {
+        String encodedFileName= null;
+        String finalUrl = null;
+        try {
+            encodedFileName = URLEncoder.encode(fileKey, "utf-8").replace("+","%20");
+            String publicUrl = String.format("%s/%s", this.qiNiuYunCofig.getHost(),encodedFileName);
+            //1小时，可以自定义链接过期时间
+            long expireInSeconds = 3600;
+            finalUrl = auth.privateDownloadUrl(publicUrl, expireInSeconds);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return finalUrl;
+    }
+
+    public boolean removeFile(String bucketName, String fileKey){
+        try {
+            bucketManager.delete(bucketName, fileKey);
+
+        }catch (QiniuException e){
+            e.printStackTrace();
+        }
+            return true;
+    }
+}
