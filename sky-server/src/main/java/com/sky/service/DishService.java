@@ -54,4 +54,11 @@ public interface DishService {
      */
     List<Dish> getClassifyByIdList(Long categoryId);
 
+    /**
+     * 启用、禁用 菜品
+     * @param status
+     * @param id
+     * @return
+     */
+    void startOrStop(Integer status, Long id);
 }

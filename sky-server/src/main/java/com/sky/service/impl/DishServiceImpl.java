@@ -162,9 +162,22 @@ public class DishServiceImpl implements DishService {
      * @param categoryId
      * @return
      */
-    @Override
     public List<Dish> getClassifyByIdList(Long categoryId) {
 
         return dishMapper.getClassifyByIdList(categoryId);
+    }
+
+    /**
+     * 启用、禁用 菜品
+     * @param status
+     * @param id
+     * @return
+     */
+    public void startOrStop(Integer status, Long id) {
+        Dish dish = Dish.builder()
+                .id(id)
+                .status(status)
+                .build();
+        dishMapper.update(dish);
     }
 }

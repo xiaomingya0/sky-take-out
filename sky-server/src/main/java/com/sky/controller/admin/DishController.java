@@ -129,4 +129,17 @@ public class DishController {
             // 或者使用自定义的错误码和消息
         }
     }
+
+    /**
+     * 启用、禁用 菜品
+     * @param status
+     * @param id
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    @ApiOperation(value = "启用、禁用 菜品")
+    public Result<String> startOrStop(@PathVariable("status") Integer status, Long id){
+        dishService.startOrStop(status,id);
+        return Result.success();
+    }
 }

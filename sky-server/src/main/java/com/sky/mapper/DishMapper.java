@@ -47,7 +47,7 @@ public interface DishMapper {
     Dish getById(Long id);
 
     /**
-     * 根据主键删除菜品数据
+     * 根据逐渐删除菜品数据
      * @param id
      */
     @Delete("delete from dish where id = #{id}")
@@ -61,6 +61,7 @@ public interface DishMapper {
 
     /**
      * 根据分类id查询菜品数据
+     *
      * @param categoryId
      * @return
      */
