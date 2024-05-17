@@ -16,8 +16,6 @@ redis:
   host: ${sky.redis.host}
   port: ${sky.redis.port}
   database: ${sky.redis.database}}
-
-
   servlet:
 
 mybatis:
@@ -44,7 +42,13 @@ sky:
     admin-ttl: 7200000
     # 设置前端传递过来的令牌名称
     admin-token-name: token
+    user-secret-key: xiaoming
+    user-ttl: 7200000
+    user-token-name: authentication
 
+  wechat:
+    appid: wx77710a37c48d5ddf
+    secret: f112d4165d2dc12c35d2fd350793509c
 
 #七牛云配置
 
@@ -55,11 +59,12 @@ oss:
     secretKey: T4kVgWcDJJv4HdCD1E0WY-361pRGNJ8J9fbzcx3s
     bucketName: xiaoming-sky-ceshi
 
+
+
+
+
 #upload:
 #  server:
 #    directory: /img
-
-
-
 
 

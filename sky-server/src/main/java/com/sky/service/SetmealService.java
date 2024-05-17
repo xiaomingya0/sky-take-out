@@ -1,7 +1,11 @@
 package com.sky.service;
 
+import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.result.PageResult;
+import com.sky.vo.SetmealVO;
+
+import java.util.List;
 
 /**
  * 功能
@@ -16,4 +20,38 @@ public interface SetmealService {
      * @return
      */
     PageResult pageQuery(SetmealPageQueryDTO setmealPageQueryDTO);
+
+    /**
+     * 新增套餐，同时需要保存套餐和菜品的关联关系
+     * @param setmealDTO
+     * @return
+     */
+    void sabeWithDish(SetmealDTO setmealDTO);
+
+    /**
+     * 删除套餐
+     * @param ids
+     * @return
+     */
+    void deleteBatch(List<Long> ids);
+
+    /**
+     * 根据id查询套餐和套餐的菜品关系
+     * @param id
+     * @return
+     */
+    SetmealVO getByIdWithDish(Long id);
+
+    /**
+     * 修改套餐
+     * @param setmealDTO
+     */
+    void update(SetmealDTO setmealDTO);
+
+    /**
+     * 套餐起售停售
+     * @param status
+     * @param id
+     */
+    void startOrStop(Integer status, Long id);
 }

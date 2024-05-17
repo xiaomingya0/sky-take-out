@@ -11,3 +11,7 @@ redis:
   host: localhost
   port: 6379
   database: 0
+
+#wechat:
+#  appid: wx77710a37c48d5ddf
+#  secret: f112d4165d2dc12c35d2fd350793509c
