@@ -130,15 +130,11 @@ public class DishController {
     @ApiOperation(value = "根据分类id查询菜品")
     public Result<List<Dish>> getClassifyByIdList(@PathVariable("categoryId") Long categoryId) {
         log.info("根据分类id来查询菜品列表: {}", categoryId);
-        try {
+
             List<Dish> dishList = dishService.getClassifyByIdList(categoryId);
             return Result.success(dishList);
-        } catch (Exception e) {
-            log.error("查询菜品列表时发生异常: {}", e.getMessage(), e);
-            System.out.println(e);
-            return Result.error(e.getMessage());
             // 或者使用自定义的错误码和消息
-        }
+
     }
 
     /**

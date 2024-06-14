@@ -61,9 +61,16 @@ public class SetmealController {
      */
     @DeleteMapping
     @ApiOperation("批量删除套餐")
-    public Result deleteBatch(List<Long> ids){
-        semtealService.deleteBatch(ids);
-        return Result.success();
+    public Result deleteBatch(@RequestParam List<Long> ids){
+
+        try{
+            semtealService.deleteBatch(ids);
+            return Result.success();
+        }catch (Exception e){
+            System.out.println(e);
+            return Result.error("删除失败");
+        }
+
     }
 
     /**
@@ -93,7 +100,14 @@ public class SetmealController {
     @PostMapping("/status/{status}")
     @ApiOperation("套餐起售停售")
     public Result startOrStop(@PathVariable Integer status, Long id){
-        semtealService.startOrStop(status,id);
-        return Result.success();
+        try {
+            semtealService.startOrStop(status, id);
+            return Result.success();
+        }catch (Exception e){
+            System.out.println(e);
+            return Result.success("出错了");
+
+        }
     }
 }
+

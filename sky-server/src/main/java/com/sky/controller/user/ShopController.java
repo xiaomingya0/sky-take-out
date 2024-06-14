@@ -6,7 +6,9 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 功能
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags = "店铺相关接口")
 @Slf4j
 public class ShopController {
+
 
     public static final String KEY = "SHOP_STATUS";
 
@@ -36,4 +39,6 @@ public class ShopController {
         log.info("获取到店铺的营业状态为: {}",status == 1 ? "营业中" : "打烊中");
         return Result.success(status);
     }
+
+
 }

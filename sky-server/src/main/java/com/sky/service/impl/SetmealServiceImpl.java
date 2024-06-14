@@ -132,7 +132,8 @@ public class SetmealServiceImpl implements SetmealService {
         Setmeal setmeal = new Setmeal();
         BeanUtils.copyProperties(setmealDTO, setmeal);
 
-        //修改套餐表执行update
+        //修改套餐表执行
+        // update
         setmealMapper.update(setmeal);
 
         //套餐id
